@@ -38,11 +38,11 @@ export interface House extends HouseProperties {
 
 export interface HousesGeoJSON {
   type: 'FeatureCollection';
-  features: Array<{
+  features: {
     type: 'Feature';
     geometry: { type: 'Point'; coordinates: [number, number] };
     properties: HouseProperties;
-  }>;
+  }[];
 }
 
 export type ColorMode = 'type' | 'band' | 'eiertid' | 'p5';

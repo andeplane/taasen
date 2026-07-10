@@ -24,6 +24,8 @@ jobs:
           node-version: 22
           cache: npm
       - run: npm ci
+      - run: npm run lint
+      - run: npm run test:ci
       - run: npm run build -- --base=/taasen/
       - uses: actions/upload-pages-artifact@v3
         with:

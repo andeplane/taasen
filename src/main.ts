@@ -150,6 +150,7 @@ function apply(): void {
 
   const list = table.sort(houses.filter(matches));
   mapView.setVisibility(matches);
+  mapView.renderLegend();
   table.render(list, selectedId);
   $('shown').textContent = String(list.length);
 
