@@ -81,7 +81,7 @@ const msBand = popSelect('msBand', 'Salgsutsikt', ['Lav', 'Middels', 'Høyere'],
 installPopoverDismiss();
 
 // ---- color mode menu ----
-const COLOR_MODES: Array<{ key: ColorMode; label: string }> = [
+const COLOR_MODES: { key: ColorMode; label: string }[] = [
   { key: 'type', label: 'etter boligtype' },
   { key: 'band', label: 'etter salgsutsikt' },
   { key: 'eiertid', label: 'etter år siden tinglysing' },
@@ -155,7 +155,7 @@ function apply(): void {
   $('shown').textContent = String(list.length);
 
   // chips
-  const chips: Array<[string, () => void]> = [];
+  const chips: [string, () => void][] = [];
   if (q) chips.push([`Søk: "${q}"`, () => { input('q').value = ''; }]);
   if (!msStreet.isAll()) chips.push([`Gate: ${msStreet.count()} valgt`, () => msStreet.reset()]);
   if (!msType.isAll()) chips.push([`Boligtype: ${msType.count()} valgt`, () => msType.reset()]);

@@ -30,7 +30,7 @@ const favButton = (h: House): string => {
     aria-label="${label}" title="${label}">${h.fav ? '★' : '☆'}</button>`;
 };
 
-function popupHtml(h: House): string {
+export function popupHtml(h: House): string {
   const b = bandMeta(h.salgsband);
   const t = typeMeta(h.boligtype);
   const kv = (k: string, v: string | number) =>
@@ -140,7 +140,7 @@ export function initMap(opts: MapViewOptions): MapView {
         <div class="ends"><span>${lo}</span><span>${hi}</span></div>`;
       return;
     }
-    const entries: Array<[string, string]> = mode === 'band'
+    const entries: [string, string][] = mode === 'band'
       ? (['Lav', 'Middels', 'Høyere'] as const).map(k => [k, bandMeta(k).dot])
       : boligtyper.map(k => [k, typeMeta(k).color]);
     el.innerHTML = `<div class="title">${mode === 'band' ? 'Salgsutsikt 5 år' : 'Boligtype'}</div>`

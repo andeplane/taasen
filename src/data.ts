@@ -16,7 +16,8 @@ export const houses: House[] = geojson.features.map((f, i) => ({
 
 export const housesByAdresse = new Map(houses.map(h => [h.adresse, h]));
 
-const uniq = (get: (h: House) => string) => [...new Set(houses.map(get))].sort();
+const uniq = (get: (h: House) => string) =>
+  [...new Set(houses.map(get))].sort((a, b) => a.localeCompare(b, 'nb'));
 export const streets = uniq(h => h.gate);
 export const boligtyper = uniq(h => h.boligtype);
 
@@ -40,10 +41,9 @@ export const domains: ColorDomains = computeDomains(houses);
 export interface Stat { value: string; label: string; wide?: boolean; }
 export function summaryStats(): Stat[] {
   const nProps = new Set(houses.map(h => h.gnrbnr)).size;
-  const withPlot = houses.filter(h => h.tomt_m2);
-  const avgPlot = Math.round(withPlot.reduce((s, h) => s + (h.tomt_m2 ?? 0), 0) / withPlot.length);
-  const withYear = houses.filter(h => h.byggeaar);
-  const avgYear = Math.round(withYear.reduce((s, h) => s + (h.byggeaar ?? 0), 0) / withYear.length);
+  const avg = (vals: number[]) => Math.round(vals.reduce((s, v) => s + v, 0) / vals.length);
+  const avgPlot = avg(houses.map(h => h.tomt_m2).filter((v): v is number => v != null && v > 0));
+  const avgYear = avg(houses.map(h => h.byggeaar).filter((v): v is number => v != null));
   const mix: Record<string, number> = {};
   houses.forEach(h => { mix[h.boligtype] = (mix[h.boligtype] ?? 0) + 1; });
   const topMix = Object.entries(mix).sort((a, b) => b[1] - a[1]).slice(0, 3)
