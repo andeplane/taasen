@@ -1,0 +1,109 @@
+<!doctype html>
+<html lang="no">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Tåsen, Korsvoll og Nordberg — boligutforsker</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+</head>
+<body>
+
+<header>
+  <div style="min-width:0">
+    <div class="brand">
+      <div class="dot"></div>
+      <h1>Tåsen, Korsvoll &amp; Nordberg</h1>
+      <span class="badge">Boligutforsker</span>
+    </div>
+    <p class="sub"><span id="streetCount">–</span> komplette gater i bydel Nordre Aker, Oslo · Kartverket + Hjemla + 1881 Eiendomspriser · privat datasett</p>
+  </div>
+  <div class="stats" id="stats"></div>
+</header>
+
+<div class="toolbar">
+  <div class="search">
+    <span class="glyph">⌕</span>
+    <input type="search" id="q" placeholder="Søk adresse, kjøper, gnr/bnr…">
+  </div>
+  <span class="pop-wrap" id="msStreet"></span>
+  <span class="pop-wrap" id="msType"></span>
+  <span class="pop-wrap" id="msBand"></span>
+  <span class="pop-wrap" id="colorWrap">
+    <button class="tbtn" id="colorBtn">
+      <span class="swatch"></span>
+      <span style="color:#8492a6">Fargelegg</span>
+      <span id="colorLabel" style="color:#e6ebf2">etter boligtype</span>
+      <span class="caret">▾</span>
+    </button>
+    <div class="pop menu" id="colorMenu"></div>
+  </span>
+  <button class="tbtn" id="drawerBtn">
+    <span>⚙</span><span>Filtre</span><span class="fpill" id="filterCount" style="display:none">0</span>
+  </button>
+  <button class="tbtn" id="favBtn" title="Vis kun favoritter"><span id="favStarIcon" style="color:#5a6672">★</span><span>Favoritter</span></button>
+  <div class="grow"></div>
+  <span class="count-note">Viser <b id="shown">0</b> av <span id="total">0</span></span>
+  <button class="ghost" id="reset">Nullstill</button>
+</div>
+
+<div class="chips" id="chips"></div>
+
+<div id="main">
+  <div id="tablewrap">
+    <div id="tscroll">
+      <table>
+        <thead><tr id="thead"></tr></thead>
+        <tbody id="tbody"></tbody>
+      </table>
+      <div class="noresults" id="noresults" style="display:none">Ingen adresser matcher filtrene.</div>
+    </div>
+  </div>
+  <div id="splitter" title="Dra for å endre størrelse"></div>
+  <div id="mapwrap">
+    <div id="map"></div>
+    <div class="legend" id="legend"></div>
+  </div>
+</div>
+
+<footer>
+  <b>Salgsutsikt 5 år</b> er en Weibull-basert modell fra boligtype og år siden siste tinglysing — den rangerer sannsynlighet, ikke en konkret salgsplan.
+  <b>Tinglysingsdato</b> og <b>registrert kjøper</b> kommer fra siste overdragelse hos 1881 Eiendomspriser. Navnet er ikke verifisert som dagens hjemmelshaver; tvetydige treff for seksjonerte eiendommer er skjult.
+  <b>Størrelse</b> (bruksareal-klasse), <b>byggeår</b> og <b>verdiestimat</b> kommer fra Hjemlas åpne API — eksakt bruksareal er ikke åpne data.
+</footer>
+
+<div id="overlay"></div>
+<aside id="drawer">
+  <div class="dhead">
+    <h2><span>⚙</span>Filtre</h2>
+    <button class="dclose" id="drawerClose">×</button>
+  </div>
+  <div class="dbody">
+    <div class="dfield"><div class="flabel">BRA <span>m²</span></div>
+      <div class="pair"><input type="number" id="fBraMin" placeholder="min"><span class="dash">—</span><input type="number" id="fBraMax" placeholder="maks"></div></div>
+    <div class="dfield"><div class="flabel">Tomt <span>m²</span></div>
+      <div class="pair"><input type="number" id="fPlotMin" placeholder="min"><span class="dash">—</span><input type="number" id="fPlotMax" placeholder="maks"></div></div>
+    <div class="dfield"><div class="flabel">Byggeår</div>
+      <div class="pair"><input type="number" id="fYearMin" placeholder="fra"><span class="dash">—</span><input type="number" id="fYearMax" placeholder="til"></div></div>
+    <div class="dfield"><div class="flabel">Tinglyst <span>dato</span></div>
+      <div class="pair"><input type="date" id="fTinglystFrom"><span class="dash">—</span><input type="date" id="fTinglystTo"></div></div>
+    <div class="dfield"><div class="flabel">Eiertid <span>år</span></div>
+      <div class="pair"><input type="number" id="fOwnMin" placeholder="min"><span class="dash">—</span><input type="number" id="fOwnMax" placeholder="maks"></div></div>
+    <div class="dfield"><div class="flabel">Verdiestimat <span>mill.</span></div>
+      <div class="pair"><input type="number" id="fEstMin" placeholder="min"><span class="dash">—</span><input type="number" id="fEstMax" placeholder="maks"></div></div>
+    <div class="dfield"><div class="flabel">Enheter</div>
+      <div class="pair"><input type="number" id="fUnitMin" placeholder="min"><span class="dash">—</span><input type="number" id="fUnitMax" placeholder="maks"></div></div>
+    <div class="dfield"><div class="flabel">Min. salgsutsikt 5 år <span>%</span> <span class="rangeval" id="p5Val">0 %</span></div>
+      <input type="range" id="fP5Min" min="0" max="100" value="0"></div>
+    <div class="dfield"><label class="check"><input type="checkbox" id="fFav"> Vis kun favoritter ★</label></div>
+  </div>
+  <div class="dfoot">
+    <button class="secondary" id="drawerReset">Nullstill alle</button>
+    <button class="primary" id="drawerApply">Bruk filtre</button>
+  </div>
+</aside>
+
+<script type="module" src="/src/main.ts"></script>
+</body>
+</html>
