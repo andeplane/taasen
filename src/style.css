@@ -174,8 +174,9 @@ td.kj { color:#93a0b2; }
 .pp .kv { display:flex; justify-content:space-between; gap:14px; padding:5px 0; border-bottom:1px solid #1a2230; }
 .pp .kv .k { color:var(--mut); font-size:11px; }
 .pp .kv .v { color:var(--txt); font-size:12px; font-family:'IBM Plex Mono'; font-weight:500; text-align:right; }
-.pp .links { display:flex; gap:8px; margin-top:14px; }
-.pp .links a { flex:1; text-align:center; font-size:12px; font-weight:600; padding:9px; border-radius:9px; }
+.pp .links { display:flex; flex-wrap:wrap; gap:8px; margin-top:14px; }
+.pp .links a { flex:1; text-align:center; font-size:12px; font-weight:600; padding:9px; border-radius:9px; white-space:nowrap; }
+.pp .links a.f { flex:1 1 100%; }
 .pp .links a.g { background:var(--accent); color:#062028; }
 .pp .links a.s { background:#151d29; color:#c7d2e0; border:1px solid #2a3646; }
 

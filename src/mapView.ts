@@ -2,6 +2,7 @@ import L from 'leaflet';
 import { bandMeta, colorFor, SEQ_STOPS, typeMeta } from './color';
 import { boligtyper, domains, houses } from './data';
 import { braText, buyerText, escapeHtml, estimatText, formatDate } from './format';
+import { finnSoldUrl, googleMapsUrl, streetViewUrl } from './links';
 import type { ColorMode, House } from './types';
 
 const BASE_STYLE: L.CircleMarkerOptions = { radius: 5.2, color: 'rgba(255,255,255,.55)', weight: 1, fillOpacity: .95 };
@@ -32,8 +33,6 @@ const favButton = (h: House): string => {
 function popupHtml(h: House): string {
   const b = bandMeta(h.salgsband);
   const t = typeMeta(h.boligtype);
-  const gmaps = `https://www.google.com/maps/search/?api=1&query=${h.lat},${h.lon}`;
-  const sv = `https://www.google.com/maps/@?api=1&map_action=pano&viewpoint=${h.lat},${h.lon}`;
   const kv = (k: string, v: string | number) =>
     `<div class="kv"><span class="k">${k}</span><span class="v">${v}</span></div>`;
   return `<div class="pp">
@@ -49,7 +48,7 @@ function popupHtml(h: House): string {
     ${kv('Tinglyst', formatDate(h.tinglysingsdato))}
     ${kv('Eiertid', `${h.eiertid_aar ?? '–'} år`)}
     ${kv('Registrert kjøper', escapeHtml(buyerText(h)))}
-    <div class="links"><a class="g" href="${gmaps}" target="_blank" rel="noopener">Google Maps ↗</a><a class="s" href="${sv}" target="_blank" rel="noopener">Street View</a></div>
+    <div class="links"><a class="g" href="${googleMapsUrl(h)}" target="_blank" rel="noopener">Google Maps ↗</a><a class="s" href="${streetViewUrl(h)}" target="_blank" rel="noopener">Street View</a><a class="s f" href="${finnSoldUrl(h)}" target="_blank" rel="noopener">Finn solgte eiendommer ↗</a></div>
   </div>`;
 }
 
