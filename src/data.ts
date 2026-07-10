@@ -26,13 +26,16 @@ const quantile = (vals: number[], q: number): number => {
 };
 
 // eiertid capped at p95 so a handful of 1950s deeds don't flatten the recent end of the scale
-const eiertidVals = houses.map(h => h.eiertid_aar).filter((v): v is number => v != null);
-const p5Vals = houses.map(h => h.p5).filter((v): v is number => v != null);
-export const domains: ColorDomains = {
-  eiertidMax: quantile(eiertidVals, 0.95),
-  p5Min: Math.min(...p5Vals),
-  p5Max: Math.max(...p5Vals),
-};
+export function computeDomains(hs: House[]): ColorDomains {
+  const eiertidVals = hs.map(h => h.eiertid_aar).filter((v): v is number => v != null);
+  const p5Vals = hs.map(h => h.p5).filter((v): v is number => v != null);
+  return {
+    eiertidMax: eiertidVals.length ? quantile(eiertidVals, 0.95) : 1,
+    p5Min: p5Vals.length ? Math.min(...p5Vals) : 0,
+    p5Max: p5Vals.length ? Math.max(...p5Vals) : 1,
+  };
+}
+export const domains: ColorDomains = computeDomains(houses);
 
 export interface Stat { value: string; label: string; wide?: boolean; }
 export function summaryStats(): Stat[] {

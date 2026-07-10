@@ -1,15 +1,16 @@
 import type { House } from './types';
 
-export const escapeHtml = (value: unknown): string =>
+export const escapeHtml = (value: string | number | null | undefined): string =>
   String(value ?? '').replace(/[&<>"']/g, c => ({
     '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;',
-  }[c] as string));
+  }[c]!));
 
+const DATE_FMT = new Intl.DateTimeFormat('nb-NO', { day: '2-digit', month: '2-digit', year: 'numeric' });
 export const formatDate = (iso: string | null): string =>
-  iso ? new Intl.DateTimeFormat('nb-NO').format(new Date(`${iso}T00:00:00`)) : '–';
+  iso ? DATE_FMT.format(new Date(`${iso}T00:00:00`)) : '–';
 
 export const buyerText = (h: House): string =>
-  h.registrert_kjoper || (h.kjoper_tvetydig ? 'Tvetydig – seksjonert' : '–');
+  h.registrert_kjoper ?? (h.kjoper_tvetydig ? 'Tvetydig – seksjonert' : '–');
 
 export const braText = (v: number | null): string =>
   v == null ? '–' : v === 0 ? '<30' : `${v}+`;
