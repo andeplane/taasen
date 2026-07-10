@@ -4,7 +4,7 @@ const FAV_KEY = 'tasen_favs';
 
 /** Load persisted favorites and mark the matching houses. */
 export function initFavorites(): void {
-  const stored = new Set<string>(JSON.parse(localStorage.getItem(FAV_KEY) ?? '[]'));
+  const stored = new Set(JSON.parse(localStorage.getItem(FAV_KEY) ?? '[]') as string[]);
   houses.forEach(h => { h.fav = stored.has(h.adresse); });
 }
 

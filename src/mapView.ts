@@ -1,6 +1,6 @@
 import L from 'leaflet';
 import { bandMeta, colorFor, SEQ_STOPS, typeMeta } from './color';
-import { boligtyper, domains, houses } from './data';
+import { boligtyper, computeDomains, domains as fullDomains, houses } from './data';
 import { braText, buyerText, escapeHtml, estimatText, formatDate } from './format';
 import { finnSoldUrl, googleMapsUrl, streetViewUrl } from './links';
 import type { ColorMode, House } from './types';
@@ -53,6 +53,8 @@ function popupHtml(h: House): string {
 }
 
 export function initMap(opts: MapViewOptions): MapView {
+  // color scale domain, scoped to the currently visible (filtered) houses only
+  let domains = fullDomains;
   const map = L.map('map', { preferCanvas: false }).setView([59.9536, 10.7565], 15);
   L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png',
     { maxZoom: 19, subdomains: 'abcd', attribution: '&copy; OpenStreetMap &copy; CARTO' }).addTo(map);
@@ -103,13 +105,19 @@ export function initMap(opts: MapViewOptions): MapView {
   const refreshColors = () =>
     houses.forEach(h => h.marker!.setStyle({ fillColor: colorFor(h, opts.getColorMode(), domains) }));
 
-  const setVisibility = (pred: (h: House) => boolean) =>
+  const setVisibility = (pred: (h: House) => boolean) => {
+    const visible = houses.filter(pred);
+    domains = visible.length ? computeDomains(visible) : fullDomains;
     houses.forEach(h => {
       const ok = pred(h);
-      h.marker!.setStyle({ opacity: ok ? 1 : 0, fillOpacity: ok ? .95 : 0 });
+      h.marker!.setStyle({
+        opacity: ok ? 1 : 0, fillOpacity: ok ? .95 : 0,
+        fillColor: colorFor(h, opts.getColorMode(), domains),
+      });
       const path = (h.marker as unknown as { _path?: HTMLElement })._path;
       if (path) path.style.pointerEvents = ok ? '' : 'none';
     });
+  };
 
   const highlight = (h: House, on: boolean) => {
     if (on) {

@@ -27,9 +27,9 @@ export function popSelect(
         <span class="box">✓</span>${hueFor ? `<span class="hue" style="background:${hueFor(v)}"></span>` : ''}
         <span style="flex:1">${escapeHtml(v)}</span></label>`).join('')}
     </div>`;
-  const btn = el.querySelector('.tbtn') as HTMLButtonElement;
-  const pop = el.querySelector('.pop') as HTMLElement;
-  const pill = el.querySelector('.pill') as HTMLElement;
+  const btn = el.querySelector<HTMLButtonElement>('.tbtn')!;
+  const pop = el.querySelector<HTMLElement>('.pop')!;
+  const pill = el.querySelector<HTMLElement>('.pill')!;
   const update = () => {
     pill.textContent = state.size === values.length ? 'alle' : `${state.size}/${values.length}`;
     onChange();
@@ -40,16 +40,17 @@ export function popSelect(
   };
   pop.querySelectorAll<HTMLElement>('label.opt').forEach(o => o.onclick = () => {
     const v = o.dataset.v!;
-    state.has(v) ? state.delete(v) : state.add(v);
+    if (state.has(v)) state.delete(v);
+    else state.add(v);
     o.classList.toggle('checked', state.has(v));
     update();
   });
-  (pop.querySelector('.all') as HTMLButtonElement).onclick = () => {
+  pop.querySelector<HTMLButtonElement>('.all')!.onclick = () => {
     values.forEach(v => state.add(v));
     pop.querySelectorAll('label.opt').forEach(o => o.classList.add('checked'));
     update();
   };
-  (pop.querySelector('.none') as HTMLButtonElement).onclick = () => {
+  pop.querySelector<HTMLButtonElement>('.none')!.onclick = () => {
     state.clear();
     pop.querySelectorAll('label.opt').forEach(o => o.classList.remove('checked'));
     update();
