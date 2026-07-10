@@ -232,14 +232,37 @@ $('drawerClose').onclick = closeDrawer;
 $('drawerApply').onclick = closeDrawer;
 $('overlay').onclick = closeDrawer;
 
+// ---- header minimize ----
+const HEADER_KEY = 'tasen_header_collapsed';
+const narrowScreen = window.matchMedia('(max-width: 780px)');
+function setHeaderCollapsed(collapsed: boolean): void {
+  document.body.classList.toggle('header-collapsed', collapsed);
+  $('headerToggle').setAttribute('aria-expanded', String(!collapsed));
+  mapView.map.invalidateSize();
+}
+{
+  const saved = localStorage.getItem(HEADER_KEY);
+  setHeaderCollapsed(saved != null ? saved === '1' : narrowScreen.matches);
+}
+$('headerToggle').onclick = () => {
+  const collapsed = !document.body.classList.contains('header-collapsed');
+  localStorage.setItem(HEADER_KEY, collapsed ? '1' : '0');
+  setHeaderCollapsed(collapsed);
+};
+
 // ---- resizable split between table and map ----
 const SPLIT_KEY = 'tasen_split';
 const tablewrap = $('tablewrap');
 {
   const saved = localStorage.getItem(SPLIT_KEY);
-  if (saved) tablewrap.style.flexBasis = saved;
+  if (saved && !narrowScreen.matches) tablewrap.style.flexBasis = saved;
 }
+narrowScreen.addEventListener('change', e => {
+  tablewrap.style.flexBasis = e.matches ? '' : (localStorage.getItem(SPLIT_KEY) ?? '');
+  mapView.map.invalidateSize();
+});
 $('splitter').addEventListener('pointerdown', e => {
+  if (narrowScreen.matches) return;
   e.preventDefault();
   const splitter = e.currentTarget as HTMLElement;
   splitter.setPointerCapture(e.pointerId);

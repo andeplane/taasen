@@ -20,3 +20,17 @@ if (!Element.prototype.releasePointerCapture) {
 if (!Element.prototype.scrollIntoView) {
   Element.prototype.scrollIntoView = function (this: Element, _arg?: boolean | ScrollIntoViewOptions): void { /* no-op in jsdom */ };
 }
+if (typeof window.matchMedia === 'undefined') {
+  window.matchMedia = function (query: string): MediaQueryList {
+    return {
+      matches: false,
+      media: query,
+      onchange: null,
+      addListener: () => { /* deprecated no-op */ },
+      removeListener: () => { /* deprecated no-op */ },
+      addEventListener: () => { /* no-op in jsdom */ },
+      removeEventListener: () => { /* no-op in jsdom */ },
+      dispatchEvent: () => false,
+    };
+  };
+}
