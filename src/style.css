@@ -230,17 +230,23 @@ body.drawer-open #drawer { display:flex; }
 /* ---- small screens: map-first layout ---- */
 @media (max-width: 780px) {
   header { flex-wrap:wrap; row-gap:8px; padding:12px 14px 10px; }
-  .hright { width:100%; }
+  .hright { width:100%; justify-content:flex-end; }
   .stats { flex:1; overflow-x:auto; }
-  .toolbar { padding:9px 12px; }
-  .search { flex:1 1 100%; }
+  .toolbar { padding:9px 12px; flex-wrap:nowrap; overflow-x:auto; -ms-overflow-style:none; scrollbar-width:none; }
+  .toolbar::-webkit-scrollbar { display:none; }
+  .search { flex:0 0 auto; width:56vw; }
+  .pop-wrap, .tbtn, .grow, .count-note, .ghost { flex-shrink:0; }
+  .grow { flex:0 0 12px; min-width:12px; }
   footer { display:none; }
   #drawer { width:100vw; }
 
   #main { flex-direction:column; }
-  #tablewrap { order:2; flex:0 0 34vh; min-height:170px; }
+  #tablewrap { order:2; flex:0 0 28vh; min-height:150px; }
   #splitter { display:none; }
-  #mapwrap { order:1; flex:1 1 auto; min-height:200px; }
+  #mapwrap { order:1; flex:1 1 auto; min-height:280px; }
+  .legend { padding:10px 12px; right:10px; bottom:16px; }
+  .legend .title { margin-bottom:6px; }
+  .legend .row { margin:4px 0; font-size:11px; }
 }
 
 @media (max-width: 480px) {
