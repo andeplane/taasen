@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { finnSoldUrl, googleMapsUrl, streetViewUrl } from './links';
+import { finnSoldUrl, googleMapsUrl, googleSearchUrl, streetViewUrl } from './links';
 import { makeHouse } from './test/factory';
 
 const h = makeHouse({ lat: 59.95975, lon: 10.74964 });
@@ -17,5 +17,8 @@ describe('links', () => {
   it('rounds long coordinates to 5 decimals for Finn', () => {
     expect(finnSoldUrl(makeHouse({ lat: 59.956494430003, lon: 10.748486693822 })))
       .toBe('https://www.finn.no/map/realestate/sold?lat=59.95649&lon=10.74849&results=true&zoom=16');
+  });
+  it('builds a Google search URL for a name', () => {
+    expect(googleSearchUrl('John Ole Askedal')).toBe('https://www.google.com/search?q=John+Ole+Askedal');
   });
 });

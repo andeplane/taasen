@@ -9,3 +9,6 @@ export const streetViewUrl = (h: House): string =>
 /** Finn.no "solgt eiendom" map centered on the house. */
 export const finnSoldUrl = (h: House): string =>
   `https://www.finn.no/map/realestate/sold?lat=${h.lat.toFixed(5)}&lon=${h.lon.toFixed(5)}&results=true&zoom=16`;
+
+export const googleSearchUrl = (query: string): string =>
+  `https://www.google.com/search?q=${encodeURIComponent(query).replace(/%20/g, '+')}`;

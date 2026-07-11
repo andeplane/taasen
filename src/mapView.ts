@@ -2,7 +2,7 @@ import L from 'leaflet';
 import { bandMeta, colorFor, SEQ_STOPS, typeMeta } from './color';
 import { boligtyper, computeDomains, domains as fullDomains, houses } from './data';
 import { braText, buyerText, escapeHtml, estimatText, formatDate } from './format';
-import { finnSoldUrl, googleMapsUrl, streetViewUrl } from './links';
+import { finnSoldUrl, googleMapsUrl, googleSearchUrl, streetViewUrl } from './links';
 import type { ColorMode, House } from './types';
 
 const BASE_STYLE: L.CircleMarkerOptions = { radius: 5.2, color: 'rgba(255,255,255,.55)', weight: 1, fillOpacity: .95 };
@@ -47,7 +47,9 @@ export function popupHtml(h: House): string {
     ${kv('Enheter', h.enheter)}
     ${kv('Tinglyst', formatDate(h.tinglysingsdato))}
     ${kv('Eiertid', `${h.eiertid_aar ?? '–'} år`)}
-    ${kv('Registrert kjøper', escapeHtml(buyerText(h)))}
+    ${kv('Registrert kjøper', h.registrert_kjoper
+      ? `<a href="${googleSearchUrl(h.registrert_kjoper)}" target="_blank" rel="noopener">${escapeHtml(h.registrert_kjoper)}</a>`
+      : escapeHtml(buyerText(h)))}
     <div class="links"><a class="g" href="${googleMapsUrl(h)}" target="_blank" rel="noopener">Google Maps ↗</a><a class="s" href="${streetViewUrl(h)}" target="_blank" rel="noopener">Street View</a><a class="s f" href="${finnSoldUrl(h)}" target="_blank" rel="noopener">Finn solgte eiendommer ↗</a></div>
   </div>`;
 }
