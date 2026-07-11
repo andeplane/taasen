@@ -3,8 +3,8 @@ import './style.css';
 import { bandMeta, typeMeta } from './color';
 import { boligtyper, houses, streetCount, streets, summaryStats } from './data';
 import { initFavorites, toggleFavorite } from './favorites';
-import { escapeHtml, formatDate } from './format';
-import { initMap } from './mapView';
+import { braText, escapeHtml, estimatText, formatDate } from './format';
+import { initMap, popupHtml } from './mapView';
 import { installPopoverDismiss, popSelect } from './popSelect';
 import { initTable } from './table';
 import type { ColorMode, House, Salgsband } from './types';
@@ -15,6 +15,7 @@ const input = (id: string) => $(id) as HTMLInputElement;
 // ---- state ----
 let colorBy: ColorMode = 'type';
 let selectedId: number | null = null;
+const narrowScreen = window.matchMedia('(max-width: 780px)');
 
 initFavorites();
 
@@ -48,12 +49,77 @@ function selectRow(h: House, pan: boolean): void {
   document.querySelectorAll('#tbody tr.sel').forEach(t => t.classList.remove('sel'));
   const tr = document.querySelector(`#tbody tr[data-id="${h.id}"]`);
   if (tr) { tr.classList.add('sel'); tr.scrollIntoView({ block: 'nearest' }); }
+  document.querySelectorAll('#cards .card.sel').forEach(c => c.classList.remove('sel'));
+  document.querySelector(`#cards .card[data-id="${h.id}"]`)?.classList.add('sel');
+  if (narrowScreen.matches) {
+    // on mobile the detail sheet replaces the map popup entirely
+    mapView.map.closePopup();
+    mapView.map.setView([h.lat, h.lon], Math.max(mapView.map.getZoom(), 15));
+    openSheet(h);
+    return;
+  }
   if (pan) {
     // marker clicks open the popup natively; only table selection opens it explicitly
     mapView.map.setView([h.lat, h.lon], Math.max(mapView.map.getZoom(), 16), { animate: true });
     setTimeout(() => h.marker!.openPopup(), 260);
   }
 }
+
+// ---- mobile: detail bottom sheet ----
+function openSheet(h: House): void {
+  $('sheetBody').innerHTML = popupHtml(h);
+  document.body.classList.add('sheet-open');
+}
+const closeSheet = () => document.body.classList.remove('sheet-open');
+$('sheetClose').onclick = closeSheet;
+$('sheetOverlay').onclick = closeSheet;
+
+// ---- mobile: property card list ----
+const cardsEl = $('cards');
+function cardHtml(h: House): string {
+  const t = typeMeta(h.boligtype);
+  const b = bandMeta(h.salgsband);
+  return `<div class="card${h.id === selectedId ? ' sel' : ''}" data-id="${h.id}">
+    <div class="chead">
+      <div class="cmain">
+        <div class="ctype"><i style="background:${t.color}"></i>${escapeHtml(h.boligtype)}</div>
+        <div class="cadr">${escapeHtml(h.adresse)}</div>
+      </div>
+      <button class="cstar${h.fav ? ' on' : ''}" aria-label="${h.fav ? 'Fjern fra favoritter' : 'Legg til som favoritt'}">${h.fav ? '★' : '☆'}</button>
+    </div>
+    <div class="cmid">
+      <span class="bandpill" style="color:${b.color};background:${b.bg}">${escapeHtml(h.salgsband)} <span class="pct">${(h.p5 * 100).toFixed(1)}%</span></span>
+      <span class="cest">${estimatText(h)}</span>
+    </div>
+    <div class="cmeta">
+      <span><b>BRA</b> ${braText(h.bra_min_m2)}</span>
+      <span><b>Bygd</b> ${h.byggeaar ?? '–'}</span>
+      <span><b>Tomt</b> ${h.tomt_m2 ?? '–'}</span>
+      <span><b>Tinglyst</b> ${formatDate(h.tinglysingsdato)}</span>
+    </div>
+  </div>`;
+}
+function renderCards(list: House[]): void {
+  cardsEl.innerHTML = list.length
+    ? list.map(cardHtml).join('')
+    : '<div class="noresults">Ingen adresser matcher filtrene.</div>';
+}
+cardsEl.addEventListener('click', e => {
+  const card = (e.target as HTMLElement).closest<HTMLElement>('.card');
+  if (!card) return;
+  const h = houses[+card.dataset.id!];
+  if ((e.target as HTMLElement).closest('.cstar')) { doToggleFav(h.adresse); return; }
+  selectRow(h, false);
+});
+
+// ---- mobile: list/map view toggle ----
+$('viewToggle').onclick = () => {
+  const toMap = !document.body.classList.contains('mview-map');
+  document.body.classList.toggle('mview-map', toMap);
+  $('viewToggleIcon').textContent = toMap ? '☰' : '⌖';
+  $('viewToggleLabel').textContent = toMap ? 'Liste' : 'Kart';
+  if (toMap) mapView.map.invalidateSize();
+};
 
 // ---- favorites ----
 function doToggleFav(adresse: string): void {
@@ -153,6 +219,13 @@ function apply(): void {
   mapView.renderLegend();
   table.render(list, selectedId);
   $('shown').textContent = String(list.length);
+  $('mcount').innerHTML = `<b>${list.length}</b> / ${houses.length}`;
+  if (narrowScreen.matches) renderCards(list);
+  else cardsEl.innerHTML = '';
+  const favs = houses.filter(h => h.fav).length;
+  const favCount = $('favCount');
+  favCount.style.display = favs ? '' : 'none';
+  favCount.textContent = String(favs);
 
   // chips
   const chips: [string, () => void][] = [];
@@ -234,7 +307,6 @@ $('overlay').onclick = closeDrawer;
 
 // ---- header minimize ----
 const HEADER_KEY = 'tasen_header_collapsed';
-const narrowScreen = window.matchMedia('(max-width: 780px)');
 function setHeaderCollapsed(collapsed: boolean): void {
   document.body.classList.toggle('header-collapsed', collapsed);
   $('headerToggle').setAttribute('aria-expanded', String(!collapsed));
@@ -242,7 +314,7 @@ function setHeaderCollapsed(collapsed: boolean): void {
 }
 {
   const saved = localStorage.getItem(HEADER_KEY);
-  setHeaderCollapsed(saved != null ? saved === '1' : narrowScreen.matches);
+  setHeaderCollapsed(saved === '1');
 }
 $('headerToggle').onclick = () => {
   const collapsed = !document.body.classList.contains('header-collapsed');
@@ -260,6 +332,7 @@ const tablewrap = $('tablewrap');
 narrowScreen.addEventListener('change', e => {
   tablewrap.style.flexBasis = e.matches ? '' : (localStorage.getItem(SPLIT_KEY) ?? '');
   mapView.map.invalidateSize();
+  apply(); // render (or drop) the mobile card list for the new breakpoint
 });
 $('splitter').addEventListener('pointerdown', e => {
   if (narrowScreen.matches) return;
