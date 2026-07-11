@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { braText, buyerText, escapeHtml, estimatText, formatDate, nb } from './format';
+import { braText, buyerNames, buyerText, escapeHtml, estimatText, formatDate, nb } from './format';
 import { makeHouse } from './test/factory';
 
 describe('escapeHtml', () => {
@@ -35,6 +35,19 @@ describe('buyerText', () => {
   });
   it('returns dash when unknown', () => {
     expect(buyerText(makeHouse({ registrert_kjoper: null, kjoper_tvetydig: false }))).toBe('–');
+  });
+});
+
+describe('buyerNames', () => {
+  it('splits multiple co-buyers on commas and trims them', () => {
+    expect(buyerNames(makeHouse({ registrert_kjoper: 'Ola Nordmann, Kari Nordmann' })))
+      .toEqual(['Ola Nordmann', 'Kari Nordmann']);
+  });
+  it('returns a single-element array for one buyer', () => {
+    expect(buyerNames(makeHouse({ registrert_kjoper: 'Ola Nordmann' }))).toEqual(['Ola Nordmann']);
+  });
+  it('returns an empty array when unknown', () => {
+    expect(buyerNames(makeHouse({ registrert_kjoper: null }))).toEqual([]);
   });
 });
 

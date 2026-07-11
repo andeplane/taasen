@@ -12,6 +12,10 @@ export const formatDate = (iso: string | null): string =>
 export const buyerText = (h: House): string =>
   h.registrert_kjoper ?? (h.kjoper_tvetydig ? 'Tvetydig – seksjonert' : '–');
 
+/** Registered buyer names, split on commas (a property can have multiple co-buyers). */
+export const buyerNames = (h: House): string[] =>
+  h.registrert_kjoper ? h.registrert_kjoper.split(',').map(n => n.trim()).filter(Boolean) : [];
+
 export const braText = (v: number | null): string =>
   v == null ? '–' : v === 0 ? '<30' : `${v}+`;
 

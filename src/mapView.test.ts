@@ -168,6 +168,17 @@ describe('popup content', () => {
     const html = popupHtml(makeHouse({ bra_klasse: 'over 150 m²' }));
     expect(html).toContain('over 150 m²');
   });
+
+  it('links the registered buyer name to a Google search', () => {
+    const html = popupHtml(makeHouse({ registrert_kjoper: 'Kari Nordmann' }));
+    expect(html).toContain('<a href="https://www.google.com/search?q=Kari+Nordmann" target="_blank" rel="noopener">Kari Nordmann</a>');
+  });
+
+  it('splits co-buyers into separate Google search links', () => {
+    const html = popupHtml(makeHouse({ registrert_kjoper: 'Ola Nordmann, Kari Nordmann' }));
+    expect(html).toContain('<a href="https://www.google.com/search?q=Ola+Nordmann" target="_blank" rel="noopener">Ola Nordmann</a>');
+    expect(html).toContain('<a href="https://www.google.com/search?q=Kari+Nordmann" target="_blank" rel="noopener">Kari Nordmann</a>');
+  });
 });
 
 describe('popup fit (keeps popups inside the map)', () => {
